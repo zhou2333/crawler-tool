@@ -37,11 +37,10 @@ async def main():
                 break
 
             # 检查是否存在“下一页”的按钮
-            next_button = await page.query_selector("//*[@class='page_next omega']")  # 替换成你页面的“下一页”按钮的选择器
+            next_button = await page.query_selector("//*[@class='page_next omega']")
 
             if next_button:
                 await next_button.click()
-                # 等待页面加载完毕，可以根据页面具体情况调整等待方式
                 await page.wait_for_load_state('domcontentloaded')
             else:
                 break
