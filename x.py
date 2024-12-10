@@ -9,29 +9,49 @@ async def main():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=False)
         context = await browser.new_context()
+
         await context.add_cookies([
             {
-                "auth_token": "",
+                "name": "auth_token",
+                "value": "05280b9c94cab756ae4038e302e260131a038db8",
+                "domain": ".x.com",
+                "path": "/"
             }
         ])
         page = await context.new_page()
 
-        keyword = '性爱视频'
+        keyword = '博彩'
         total_count = 20
         base_url = 'https://x.com'
         url = base_url + f'/search?q={keyword}&src=typed_query'
 
+
+
+        # 用于存储视频 URL
+        video_urls = []
+
+        # 拦截网络请求的响应
+        def handle_response(response):
+            try:
+                if (
+                        response.request.resource_type == "media"
+                        and "video" in response.headers.get("content-type", "")
+                        and "video.twimg.com" in response.url
+                ):
+                    print(f"Found video URL: {response.url}")
+                    video_urls.append(response.url)
+            except Exception as e:
+                print(f"Error handling response: {e}")
+
+        # 设置监听器
+        context.on("response", handle_response)
+
         await page.goto(url)
 
-        await page.get_by_label("搜索过滤条件").click()
-        await page.locator('//*[@id="label"]/yt-formatted-string[contains(text(), "视频")]').click()
+        page.wait_for_timeout(5000)  # 等待 5 秒以确保视频请求已发送
 
-        await page.wait_for_timeout(1000)
-
-        await page.get_by_label("搜索过滤条件").click()
-        await page.get_by_role("link", name="4 分钟以下").click()
-
-        user_data = {}
+        print(video_urls)
+        user_data = ()
 
         while True:
             await page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight);")
